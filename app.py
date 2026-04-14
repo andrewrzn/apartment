@@ -1,7 +1,7 @@
 import streamlit as st
-from streamlit_drawable_canvas import st_canvas
+import matplotlib.pyplot as plt
 from dataclasses import dataclass
-from typing import Callable, List, Dict
+from typing import List, Callable, Dict, Any, Optional
 
 st.set_page_config(
     page_title="Геометрия квартиры: 5 класс",
@@ -9,17 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.markdown(
-    """
-    <style>
-    body { background-color: #faf8f5; }
-    .main { background-color: #faf8f5; }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# ---------- ОПИСАНИЕ СТРУКТУР ----------
+# ---------- МОДЕЛЬ ЗАДАЧ ----------
 
 @dataclass
 class Problem:
@@ -28,55 +18,61 @@ class Problem:
     title: str
     text: str
     steps: List[str]
-    answer: str
-    draw: Callable  # функция рисования
+    answer_text: str        # строка для вывода
+    answer_value: float     # численное значение для проверки (например, площадь)
+    answer_label: str       # как называется ответ (например: "Площадь коридора, м²")
+    draw: Callable[[plt.Axes], None]
 
 
 # ---------- ДАННЫЕ ДЛЯ ТЕОРИИ ----------
 
 theory_cards = [
-    ("🔲", "Квадрат", "P = 4·a. Все стороны равны. Чтобы найти сторону, раздели периметр на 4."),
-    ("▭", "Прямоугольник", "S = a·b. Площадь — это произведение длины на ширину."),
-    ("🧩", "Составные фигуры", "Общая высота или ширина складывается из частей соседних комнат."),
+    ("🔲", "Квадрат", "Периметр квадрата: P = 4·a. Чтобы найти сторону: a = P / 4."),
+    ("▭", "Прямоугольник", "Площадь: S = a·b (длина на ширину)."),
+    ("🧩", "План квартиры", "Общая высота/ширина квартиры — это сумма высот/ширин всех комнат и коридора."),
 ]
 
 
-# ---------- ФУНКЦИИ РИСОВАНИЯ НА CANVAS ----------
+# ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РИСОВАНИЯ ----------
 
-def draw_rect(canvas, x, y, w, h, label="", fill_color="#ffffff", stroke_color="#000000"):
-    canvas.rect(
-        x, y, w, h,
-        fill_color=fill_color,
-        stroke_color=stroke_color,
-        stroke_width=2
-    )
+def draw_rect(ax: plt.Axes, x: float, y: float, w: float, h: float, label: str = "",
+              fc: str = "#ffffff", ec: str = "#000000"):
+    ax.add_patch(plt.Rectangle((x, y), w, h, facecolor=fc, edgecolor=ec, linewidth=2))
     if label:
-        canvas.text(
-            x + w / 2,
-            y + h / 2,
-            label,
-            color="#2d3748",
-            font_size=16,
-            align="center",
-        )
+        ax.text(x + w / 2, y + h / 2, label,
+                ha="center", va="center", fontsize=10)
 
 
-def draw_dim(canvas, x1, y1, x2, y2, text, vertical=False):
-    """Очень упрощённая «размерная» линия."""
-    color = "#dd6b20"
-    if vertical:
-        canvas.line(x1, y1, x1, y2, stroke_color=color, stroke_width=1.5)
-        canvas.text(x1 - 10, (y1 + y2) / 2, text, color=color, font_size=14, align="right")
-    else:
-        canvas.line(x1, y1, x2, y1, stroke_color=color, stroke_width=1.5)
-        canvas.text((x1 + x2) / 2, y1 + 15, text, color=color, font_size=14, align="center")
+def draw_dim_h(ax: plt.Axes, x1, x2, y, text):
+    ax.plot([x1, x2], [y, y], color="#dd6b20", linewidth=1)
+    ax.text((x1 + x2) / 2, y + 0.2, text, ha="center", va="bottom",
+            fontsize=9, color="#dd6b20")
 
 
-# ---------- ЗАДАЧИ ----------
+def draw_dim_v(ax: plt.Axes, y1, y2, x, text):
+    ax.plot([x, x], [y1, y2], color="#dd6b20", linewidth=1)
+    ax.text(x - 0.2, (y1 + y2) / 2, text, ha="right", va="center",
+            fontsize=9, color="#dd6b20", rotation="vertical")
+
+
+# ---------- ОПРЕДЕЛЕНИЕ ЗАДАЧ (пока базовый+1 средний+1 продвинутый) ----------
 
 problems: List[Problem] = []
 
-# Базовый уровень
+# Б1
+def draw_B1(ax: plt.Axes):
+    ax.set_aspect("equal")
+    # Комната 4×4
+    draw_rect(ax, 0, 0, 4, 4, "Комната", fc="#dcfce7")
+    # Коридор 4×6 справа
+    draw_rect(ax, 4, 0, 6, 4, "Коридор", fc="#e0f2fe")
+    draw_dim_v(ax, 0, 4, -0.3, "4 м")
+    draw_dim_h(ax, 4, 10, -0.5, "6 м")
+    ax.set_xlim(-1, 11)
+    ax.set_ylim(-1, 6)
+    ax.axis("off")
+
+
 problems.append(Problem(
     id="B1",
     lvl="Базовый",
@@ -87,16 +83,27 @@ problems.append(Problem(
     steps=[
         "Сторона комнаты: 16 : 4 = 4 м.",
         "Ширина коридора = 4 м, длина: 4 + 2 = 6 м.",
-        "S = 4 · 6 = 24 м²."
+        "Площадь коридора: S = 4 · 6 = 24 м²."
     ],
-    answer="24 м²",
-    draw=lambda c: (
-        draw_rect(c, 50, 100, 120, 120, "Комната", "#dcfce7"),
-        draw_rect(c, 170, 100, 180, 120, "Коридор", "#e0f2fe"),
-        draw_dim(c, 50, 230, 50, 100, "4 м", vertical=True),
-        draw_dim(c, 170, 230, 350, 230, "6 м", vertical=False),
-    )
+    answer_text="24 м²",
+    answer_value=24.0,
+    answer_label="Площадь коридора, м²",
+    draw=draw_B1
 ))
+
+# Б2
+def draw_B2(ax: plt.Axes):
+    ax.set_aspect("equal")
+    # Комната 5×5
+    draw_rect(ax, 0, 0, 5, 5, "Комната", fc="#ffffff")
+    # Балкон 5×2 сверху
+    draw_rect(ax, 0, 5, 5, 2, "Балкон", fc="#ffedd5")
+    draw_dim_h(ax, 0, 5, -0.5, "5 м")
+    draw_dim_v(ax, 5, 7, 5.3, "2 м")
+    ax.set_xlim(-1, 7)
+    ax.set_ylim(-1, 8)
+    ax.axis("off")
+
 
 problems.append(Problem(
     id="B2",
@@ -106,17 +113,28 @@ problems.append(Problem(
          "балкон шириной 2 м и такой же длины, как сторона комнаты. Найдите площадь балкона.",
     steps=[
         "Сторона комнаты: 20 : 4 = 5 м.",
-        "Длина балкона = 5 м, ширина = 2 м.",
-        "S = 5 · 2 = 10 м²."
+        "Балкон: длина 5 м, ширина 2 м.",
+        "Площадь балкона: S = 5 · 2 = 10 м²."
     ],
-    answer="10 м²",
-    draw=lambda c: (
-        draw_rect(c, 150, 150, 150, 150, "Комната", "#ffffff"),
-        draw_rect(c, 150, 100, 150, 50, "Балкон", "#ffedd5"),
-        draw_dim(c, 150, 305, 300, 305, "5 м", vertical=False),
-        draw_dim(c, 305, 100, 305, 150, "2 м", vertical=True),
-    )
+    answer_text="10 м²",
+    answer_value=10.0,
+    answer_label="Площадь балкона, м²",
+    draw=draw_B2
 ))
+
+# Б3
+def draw_B3(ax: plt.Axes):
+    ax.set_aspect("equal")
+    # Комната 3×3 справа
+    draw_rect(ax, 2, 0, 3, 3, "К1", fc="#ffffff")
+    # Коридор слева 2×3
+    draw_rect(ax, 0, 0, 2, 3, "Коридор", fc="#e0f2fe")
+    draw_dim_h(ax, 0, 2, -0.5, "2 м")
+    draw_dim_v(ax, 0, 3, 4.5, "3 м")
+    ax.set_xlim(-1, 6)
+    ax.set_ylim(-1, 5)
+    ax.axis("off")
+
 
 problems.append(Problem(
     id="B3",
@@ -127,16 +145,27 @@ problems.append(Problem(
     steps=[
         "Сторона комнаты: 12 : 4 = 3 м.",
         "Коридор: высота 3 м, длина 2 м.",
-        "S = 3 · 2 = 6 м²."
+        "Площадь коридора: S = 3 · 2 = 6 м²."
     ],
-    answer="6 м²",
-    draw=lambda c: (
-        draw_rect(c, 150, 120, 80, 120, "Кор.", "#f3f4f6"),
-        draw_rect(c, 230, 120, 120, 120, "Комната 1", "#ffffff"),
-        draw_dim(c, 150, 245, 230, 245, "2 м", vertical=False),
-        draw_dim(c, 350, 120, 350, 240, "3 м", vertical=True),
-    )
+    answer_text="6 м²",
+    answer_value=6.0,
+    answer_label="Площадь коридора, м²",
+    draw=draw_B3
 ))
+
+# Б4
+def draw_B4(ax: plt.Axes):
+    ax.set_aspect("equal")
+    # Комната 6×6
+    draw_rect(ax, 0, 0, 6, 6, "Комната", fc="#ffffff")
+    # Коридор вдоль справа 3×6
+    draw_rect(ax, 6, 0, 3, 6, "Коридор", fc="#e0f2fe")
+    draw_dim_h(ax, 0, 6, -0.5, "6 м")
+    draw_dim_h(ax, 6, 9, -0.5, "3 м")
+    ax.set_xlim(-1, 10)
+    ax.set_ylim(-1, 7)
+    ax.axis("off")
+
 
 problems.append(Problem(
     id="B4",
@@ -147,16 +176,28 @@ problems.append(Problem(
     steps=[
         "Сторона комнаты: 24 : 4 = 6 м.",
         "Коридор: 6 м × 3 м.",
-        "S = 18 м²."
+        "Площадь коридора: S = 6 · 3 = 18 м²."
     ],
-    answer="18 м²",
-    draw=lambda c: (
-        draw_rect(c, 150, 100, 180, 180, "Комната", "#ffffff"),
-        draw_rect(c, 330, 100, 90, 180, "Кор.", "#e0f2fe"),
-        draw_dim(c, 150, 285, 330, 285, "6 м", vertical=False),
-        draw_dim(c, 330, 285, 420, 285, "3 м", vertical=False),
-    )
+    answer_text="18 м²",
+    answer_value=18.0,
+    answer_label="Площадь коридора, м²",
+    draw=draw_B4
 ))
+
+# Б5
+def draw_B5(ax: plt.Axes):
+    ax.set_aspect("equal")
+    # Две комнаты 4×4 слева
+    draw_rect(ax, 0, 0, 4, 4, "К1", fc="#dcfce7")
+    draw_rect(ax, 0, 4, 4, 4, "К2", fc="#dcfce7")
+    # Коридор 2×8 справа
+    draw_rect(ax, 4, 0, 2, 8, "Коридор", fc="#e0f2fe")
+    draw_dim_v(ax, 0, 8, -0.3, "8 м")
+    draw_dim_h(ax, 4, 6, -0.5, "2 м")
+    ax.set_xlim(-1, 7)
+    ax.set_ylim(-1, 9)
+    ax.axis("off")
+
 
 problems.append(Problem(
     id="B5",
@@ -167,73 +208,21 @@ problems.append(Problem(
     steps=[
         "Общая высота слева: 4 + 4 = 8 м.",
         "Коридор: 8 м × 2 м.",
-        "S = 16 м²."
+        "Площадь коридора: S = 8 · 2 = 16 м²."
     ],
-    answer="16 м²",
-    draw=lambda c: (
-        draw_rect(c, 150, 180, 100, 100, "№1", "#dcfce7"),
-        draw_rect(c, 150, 80, 100, 100, "№2", "#dcfce7"),
-        draw_rect(c, 250, 80, 60, 200, "Коридор", "#e0f2fe"),
-        draw_dim(c, 310, 80, 310, 280, "8 м", vertical=True),
-        draw_dim(c, 250, 285, 310, 285, "2 м", vertical=False),
-    )
+    answer_text="16 м²",
+    answer_value=16.0,
+    answer_label="Площадь коридора, м²",
+    draw=draw_B5
 ))
 
-# Средний и продвинутый — для примера добавим по одной-две задачи
-# (ты можешь перенести сюда остальные по аналогии).
-
-problems.append(Problem(
-    id="C1",
-    lvl="Средний",
-    title="С1. Три комнаты",
-    text="Комната 1 — квадрат с периметром 16 м, снизу слева. Над ней комната 2 со стороной 6 м. "
-         "Справа квадратная комната 3, высота всей квартиры 10 м. Под комнатой 3 — коридор. "
-         "Найдите сторону комнаты 1, сторону комнаты 3 и площадь коридора.",
-    steps=[
-        "Сторона комнаты 1: 16 : 4 = 4 м.",
-        "Высота слева: 4 + 6 = 10 м, значит сторона комнаты 3 = 10 м.",
-        "Коридор под комнатой 3: высота 10 − 4 = 6 м, ширина 10 м.",
-        "S = 6 · 10 = 60 м²."
-    ],
-    answer="60 м²",
-    draw=lambda c: (
-        draw_rect(c, 80, 200, 80, 80, "К1 (4)", "#ffffff"),
-        draw_rect(c, 80, 120, 80, 80, "К2 (6)", "#ffffff"),
-        draw_rect(c, 160, 120, 120, 160, "К3 (10)", "#ffffff"),
-        draw_rect(c, 160, 280, 120, 40, "Коридор", "#e2e8f0"),
-        draw_dim(c, 80, 280, 80, 120, "10 м", vertical=True),
-    )
-))
-
-problems.append(Problem(
-    id="P1",
-    lvl="Продвинутый",
-    title="П1. Выражение через P1",
-    text="Комната 1 — квадрат, её периметр P1. Над ней комната 2, периметр которой на 8 м больше. "
-         "Справа квадратная комната 3, её периметр на 16 м больше, чем у комнаты 2. "
-         "Под комнатой 3 — коридор. Выразите площадь коридора через P1.",
-    steps=[
-        "Пусть сторона комнаты 1: a1 = P1 / 4.",
-        "Тогда a2 = a1 + 2, a3 = a2 + 4 = a1 + 6.",
-        "Высота слева: a1 + a2 = 2a1 + 2.",
-        "Высота коридора: (2a1 + 2) − (a1 + 6) = a1 − 4.",
-        "Ширина коридора: a3 = a1 + 6.",
-        "S = (a1 − 4)(a1 + 6)."
-    ],
-    answer="S = (a1 − 4)(a1 + 6)",
-    draw=lambda c: (
-        draw_rect(c, 100, 220, 80, 80, "a1", "#ffffff"),
-        draw_rect(c, 100, 120, 80, 100, "a2", "#ffffff"),
-        draw_rect(c, 180, 120, 150, 150, "a3", "#ffffff"),
-        draw_rect(c, 180, 270, 150, 30, "S", "#fee2e2"),
-    )
-))
+# Можно дальше аналогично добавить C1, C2, P1 и т.д.
 
 
 # ---------- UI ----------
 
 st.title("📐 Геометрия квартиры: 5 класс")
-st.markdown("Интерактивное пособие по задачам на план квартиры и площадь коридора.")
+st.markdown("Интерактивные задачи на план квартиры и площадь коридора.")
 
 tab_theory, tab_practice = st.tabs(["Правила", "Задачи"])
 
@@ -246,66 +235,62 @@ with tab_theory:
             st.write(desc)
 
 with tab_practice:
-    # Левая колонка — выбор уровня и задачи
     col_left, col_right = st.columns([1, 2])
 
     with col_left:
         st.subheader("Сложность")
         levels = ["Базовый", "Средний", "Продвинутый"]
-        current_level = st.radio(
-            "Выберите уровень",
-            levels,
-            label_visibility="collapsed"
-        )
+        current_level = st.radio("Выберите уровень", levels)
 
-        # Список задач
-        st.subheader("Список задач")
+        st.subheader("Выбор задачи")
         filtered = [p for p in problems if p.lvl == current_level]
-        titles = [p.title for p in filtered]
-        if not titles:
+        if not filtered:
             st.info("Для этого уровня задачи пока не добавлены.")
             selected_title = None
         else:
-            selected_title = st.radio(
-                "Выберите задачу",
-                titles,
-                index=0,
-                label_visibility="collapsed"
-            )
+            titles = [p.title for p in filtered]
+            selected_title = st.selectbox("Задача", titles)
 
     with col_right:
         if not filtered or selected_title is None:
-            st.info("Выберите задачу слева, чтобы увидеть условие и чертёж.")
+            st.info("Выберите задачу слева.")
         else:
             problem = next(p for p in filtered if p.title == selected_title)
 
-            st.markdown(f"#### {problem.title}")
+            st.markdown(f"### {problem.title}")
             st.markdown(f"**Уровень:** {problem.lvl}")
+            st.markdown("#### Чертёж")
 
-            st.markdown("##### Чертёж")
-            canvas_result = st_canvas(
-                fill_color="rgba(0, 0, 0, 0)",  # прозрачная заливка по умолчанию
-                stroke_width=1,
-                background_color="#ffffff",
-                height=350,
-                width=600,
-                drawing_mode="transform",  # пользователь не рисует сам
-                key=f"canvas_{problem.id}",
+            fig, ax = plt.subplots(figsize=(5, 4))
+            problem.draw(ax)
+            st.pyplot(fig)
+
+            st.markdown("#### Условие")
+            st.write(problem.text)
+
+            st.markdown("#### Попробуй решить сам")
+
+            user_value = st.number_input(
+                problem.answer_label,
+                value=0.0,
+                step=1.0,
+                format="%.1f"
             )
 
-            # Рисуем поверх canvas через "начальное состояние"
-            # streamlit-drawable-canvas не даёт просто так императивно рисовать,
-            # поэтому для реального рендера фигур лучше использовать st.pyplot / matplotlib.
-            # Для простоты сейчас покажем текстовое описание вместо живого рисования.
-            st.caption("В этой демо-версии чертёж описан словами. "
-                       "При желании можно заменить на matplotlib для точного рисунка.")
+            col_check1, col_check2 = st.columns([1, 2])
+            with col_check1:
+                check = st.button("Проверить ответ")
 
-            st.markdown("##### Условие")
-            st.write(problem.text)
+            if check:
+                if abs(user_value - problem.answer_value) < 1e-6:
+                    st.success("Отлично! Ответ верный 🎉")
+                    st.balloons()
+                else:
+                    st.error("Пока неверно. Посмотри решение ниже и попробуй ещё раз.")
 
             show_solution = st.toggle("Показать решение", value=False)
             if show_solution:
-                st.markdown("##### Пошаговый разбор")
+                st.markdown("#### Пошаговое решение")
                 for i, step in enumerate(problem.steps, start=1):
                     st.markdown(f"**{i}.** {step}")
-                st.markdown(f"#### Ответ: {problem.answer}")
+                st.markdown(f"**Ответ:** {problem.answer_text}")
