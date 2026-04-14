@@ -48,6 +48,11 @@ st.markdown(
         color: #0f172a !important;
         font-weight: 500 !important;
     }
+    /* Полоска st.progress — синяя (в теме заливка = secondary, часто красная) */
+    div[data-testid="stProgress"] [role="progressbar"] > div > div > div {
+        background-color: #2563eb !important;
+        background-image: none !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
