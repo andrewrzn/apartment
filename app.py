@@ -1,3 +1,4 @@
+import io
 import streamlit as st
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
@@ -18,6 +19,23 @@ st.set_page_config(
     page_title="Геометрия квартиры: 5 класс",
     page_icon="📐",
     layout="wide",
+)
+
+# На Streamlit Cloud колонки часто выравниваются по высоте — контент «уезжает» вниз;
+# блок st.image иногда получает лишний min-height. CSS и vertical_alignment это исправляют.
+st.markdown(
+    """
+    <style>
+    div[data-testid="stImage"],
+    div[data-testid="stImage"] > div {
+        min-height: 0 !important;
+    }
+    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        align-self: flex-start !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 # ---------- МОДЕЛЬ ЗАДАЧ ----------
@@ -721,9 +739,18 @@ with tab_practice:
     if grade:
         st.markdown(f"Класс: {grade}")
 
+    _stats = st.session_state["stats"]
+    _rate_txt = ""
+    if _stats["attempts"] > 0:
+        _rate_txt = f" · верно {_stats['success'] / _stats['attempts'] * 100:.0f}%"
+    st.caption(
+        f"Статистика за сеанс: попыток — {_stats['attempts']}, "
+        f"верных — {_stats['success']}{_rate_txt}"
+    )
+
     st.markdown("---")
 
-    col_left, col_right = st.columns([1, 2])
+    col_left, col_right = st.columns([1, 2], gap="small", vertical_alignment="top")
 
     with col_left:
         st.subheader("Сложность")
@@ -739,16 +766,6 @@ with tab_practice:
             titles = [p.title for p in filtered]
             selected_title = st.selectbox("Задача", titles)
 
-        st.markdown("---")
-        st.caption("Статистика за сеанс")
-        _stats = st.session_state["stats"]
-        st.markdown(
-            f"Попыток: **{_stats['attempts']}** · Верных: **{_stats['success']}**"
-        )
-        if _stats["attempts"] > 0:
-            _rate = _stats["success"] / _stats["attempts"] * 100
-            st.caption(f"Доля верных: {_rate:.1f}%")
-
     with col_right:
         if not filtered or selected_title is None:
             st.info("Выберите задачу слева.")
@@ -756,14 +773,24 @@ with tab_practice:
             problem = next(p for p in filtered if p.title == selected_title)
 
             st.markdown(f"### {problem.title}")
-            st.markdown(f"**Уровень:** {problem.lvl}")
+            st.caption(f"Уровень: {problem.lvl}")
 
-            st.markdown("#### Чертёж")
-            fig, ax = plt.subplots(figsize=(5.4, 4.2), dpi=120)
+            st.markdown("**Чертёж**")
+            fig, ax = plt.subplots(figsize=(4.8, 3.6), dpi=130)
             problem.draw(ax)
-            fig.subplots_adjust(left=0.02, right=0.98, top=0.98, bottom=0.02)
-            st.pyplot(fig, clear_figure=True)
+            fig.patch.set_facecolor("white")
+            buf = io.BytesIO()
+            fig.savefig(
+                buf,
+                format="png",
+                bbox_inches="tight",
+                pad_inches=0.05,
+                facecolor="white",
+                edgecolor="none",
+            )
             plt.close(fig)
+            buf.seek(0)
+            st.image(buf, width=520)
 
             st.markdown("#### Условие")
             st.write(problem.text)
