@@ -24,6 +24,23 @@ def setup_axes(ax, xmax: float = DEFAULT_XMAX, ymax: float = DEFAULT_YMAX) -> No
     ax.set_facecolor("#ffffff")
 
 
+def setup_axes_tight(
+    ax,
+    xmax: float,
+    ymax: float,
+    *,
+    xmin: float = 0.0,
+    ymin: float = 0.0,
+    pad: float = 0.2,
+) -> None:
+    """Оси по фактическому размеру плана — чертеж крупно заполняет картинку (для базовых задач)."""
+    ax.set_aspect("equal")
+    ax.set_xlim(xmin - pad, xmax + pad)
+    ax.set_ylim(ymin - pad, ymax + pad)
+    ax.axis("off")
+    ax.set_facecolor("#ffffff")
+
+
 def draw_rect(
     ax,
     x: float,
@@ -63,7 +80,16 @@ def draw_rect(
         )
 
 
-def draw_dim_h(ax, x1: float, x2: float, y: float, text: str, *, color: str = DIM_COLOR) -> None:
+def draw_dim_h(
+    ax,
+    x1: float,
+    x2: float,
+    y: float,
+    text: str,
+    *,
+    color: str = DIM_COLOR,
+    fontsize: int = 7,
+) -> None:
     ax.plot([x1, x2], [y, y], color=color, linewidth=1.0, zorder=10)
     tick = 0.12
     ax.plot([x1, x1], [y - tick, y + tick], color=color, lw=1, zorder=10)
@@ -74,13 +100,22 @@ def draw_dim_h(ax, x1: float, x2: float, y: float, text: str, *, color: str = DI
         text,
         ha="center",
         va="top",
-        fontsize=7,
+        fontsize=fontsize,
         color=color,
         zorder=11,
     )
 
 
-def draw_dim_v(ax, y1: float, y2: float, x: float, text: str, *, color: str = DIM_COLOR) -> None:
+def draw_dim_v(
+    ax,
+    y1: float,
+    y2: float,
+    x: float,
+    text: str,
+    *,
+    color: str = DIM_COLOR,
+    fontsize: int = 7,
+) -> None:
     ax.plot([x, x], [y1, y2], color=color, linewidth=1.0, zorder=10)
     tick = 0.12
     ax.plot([x - tick, x + tick], [y1, y1], color=color, lw=1, zorder=10)
@@ -91,7 +126,7 @@ def draw_dim_v(ax, y1: float, y2: float, x: float, text: str, *, color: str = DI
         text,
         ha="right",
         va="center",
-        fontsize=7,
+        fontsize=fontsize,
         color=color,
         rotation=90,
         zorder=11,

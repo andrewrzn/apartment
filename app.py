@@ -1,3 +1,4 @@
+import html
 import io
 import streamlit as st
 import matplotlib.pyplot as plt
@@ -6,6 +7,7 @@ from typing import List, Callable
 
 from drawing import (
     setup_axes,
+    setup_axes_tight,
     draw_rect,
     draw_dim_h,
     draw_dim_v,
@@ -14,6 +16,10 @@ from drawing import (
     CORRIDOR,
     CORRIDOR_ROSE,
 )
+
+# Крупнее подписи на базовых чертежах (мало деталей на плане)
+_BFS, _BLW = 10, 2.0
+_DFS = 9
 
 st.set_page_config(
     page_title="Геометрия квартиры: 5 класс",
@@ -29,9 +35,18 @@ st.markdown(
     div[data-testid="stImage"],
     div[data-testid="stImage"] > div {
         min-height: 0 !important;
+        margin-top: -0.9rem !important;
     }
     div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
         align-self: flex-start !important;
+    }
+    /* Поле ответа: не на всю ширину экрана */
+    div[data-testid="stNumberInput"] {
+        max-width: 14rem !important;
+    }
+    div[data-testid="stNumberInput"] label p {
+        color: #0f172a !important;
+        font-weight: 500 !important;
     }
     </style>
     """,
@@ -82,11 +97,11 @@ problems: List[Problem] = []
 
 
 def draw_B1(ax):
-    setup_axes(ax)
-    draw_rect(ax, 1, 1, 4, 4, "К", fc=ROOM_GREEN, zorder=3)
-    draw_rect(ax, 5, 1, 6, 4, "Кор", fc=CORRIDOR, zorder=2)
-    draw_dim_v(ax, 1, 5, 0.6, "4 м")
-    draw_dim_h(ax, 5, 11, 0.4, "6 м")
+    setup_axes_tight(ax, 11.6, 5.7)
+    draw_rect(ax, 1, 1, 4, 4, "К", fc=ROOM_GREEN, zorder=3, fontsize=_BFS, lw=_BLW)
+    draw_rect(ax, 5, 1, 6, 4, "Кор", fc=CORRIDOR, zorder=2, fontsize=_BFS, lw=_BLW)
+    draw_dim_v(ax, 1, 5, 0.6, "4 м", fontsize=_DFS)
+    draw_dim_h(ax, 5, 11, 0.4, "6 м", fontsize=_DFS)
 
 
 problems.append(
@@ -111,11 +126,11 @@ problems.append(
 
 
 def draw_B2(ax):
-    setup_axes(ax)
-    draw_rect(ax, 2, 1, 5, 5, "К", zorder=3)
-    draw_rect(ax, 2, 6, 5, 2, "Балк", fc=ROOM_BALC, zorder=3)
-    draw_dim_h(ax, 2, 7, 0.4, "5 м")
-    draw_dim_v(ax, 6, 8, 7.1, "2 м")
+    setup_axes_tight(ax, 8.0, 8.7, xmin=1.0, ymin=0.0)
+    draw_rect(ax, 2, 1, 5, 5, "К", zorder=3, fontsize=_BFS, lw=_BLW)
+    draw_rect(ax, 2, 6, 5, 2, "Балк", fc=ROOM_BALC, zorder=3, fontsize=_BFS, lw=_BLW)
+    draw_dim_h(ax, 2, 7, 0.4, "5 м", fontsize=_DFS)
+    draw_dim_v(ax, 6, 8, 7.1, "2 м", fontsize=_DFS)
 
 
 problems.append(
@@ -139,11 +154,11 @@ problems.append(
 
 
 def draw_B3(ax):
-    setup_axes(ax)
-    draw_rect(ax, 4, 1, 3, 3, "К1", zorder=3)
-    draw_rect(ax, 2, 1, 2, 3, "Кор", fc=CORRIDOR, zorder=2)
-    draw_dim_h(ax, 2, 4, 0.35, "2 м")
-    draw_dim_v(ax, 1, 4, 7.1, "3 м")
+    setup_axes_tight(ax, 7.9, 4.7, xmin=0.0, ymin=0.0)
+    draw_rect(ax, 4, 1, 3, 3, "К1", zorder=3, fontsize=_BFS, lw=_BLW)
+    draw_rect(ax, 2, 1, 2, 3, "Кор", fc=CORRIDOR, zorder=2, fontsize=_BFS, lw=_BLW)
+    draw_dim_h(ax, 2, 4, 0.35, "2 м", fontsize=_DFS)
+    draw_dim_v(ax, 1, 4, 7.1, "3 м", fontsize=_DFS)
 
 
 problems.append(
@@ -167,11 +182,11 @@ problems.append(
 
 
 def draw_B4(ax):
-    setup_axes(ax)
-    draw_rect(ax, 1, 1, 6, 6, "К", zorder=3)
-    draw_rect(ax, 7, 1, 3, 6, "Кор", fc=CORRIDOR, zorder=2)
-    draw_dim_h(ax, 1, 7, 0.4, "6 м")
-    draw_dim_h(ax, 7, 10, 0.4, "3 м")
+    setup_axes_tight(ax, 10.6, 7.6)
+    draw_rect(ax, 1, 1, 6, 6, "К", zorder=3, fontsize=_BFS, lw=_BLW)
+    draw_rect(ax, 7, 1, 3, 6, "Кор", fc=CORRIDOR, zorder=2, fontsize=_BFS, lw=_BLW)
+    draw_dim_h(ax, 1, 7, 0.4, "6 м", fontsize=_DFS)
+    draw_dim_h(ax, 7, 10, 0.4, "3 м", fontsize=_DFS)
 
 
 problems.append(
@@ -195,12 +210,12 @@ problems.append(
 
 
 def draw_B5(ax):
-    setup_axes(ax)
-    draw_rect(ax, 1, 1, 4, 4, "К1", fc=ROOM_GREEN, zorder=3)
-    draw_rect(ax, 1, 5, 4, 4, "К2", fc=ROOM_GREEN, zorder=3)
-    draw_rect(ax, 5, 1, 2, 8, "Кор", fc=CORRIDOR, zorder=2)
-    draw_dim_v(ax, 2, 9, 0.55, "8 м")
-    draw_dim_h(ax, 5, 7, 0.4, "2 м")
+    setup_axes_tight(ax, 7.6, 9.6)
+    draw_rect(ax, 1, 1, 4, 4, "К1", fc=ROOM_GREEN, zorder=3, fontsize=_BFS, lw=_BLW)
+    draw_rect(ax, 1, 5, 4, 4, "К2", fc=ROOM_GREEN, zorder=3, fontsize=_BFS, lw=_BLW)
+    draw_rect(ax, 5, 1, 2, 8, "Кор", fc=CORRIDOR, zorder=2, fontsize=_BFS, lw=_BLW)
+    draw_dim_v(ax, 2, 9, 0.55, "8 м", fontsize=_DFS)
+    draw_dim_h(ax, 5, 7, 0.4, "2 м", fontsize=_DFS)
 
 
 problems.append(
@@ -709,10 +724,10 @@ problems.append(
 
 # ---------- UI ----------
 
-st.title("📐 Геометрия квартиры: 5 класс")
-st.markdown("Интерактивные задачи на план квартиры и площадь коридора.")
+st.title("📐 Геометрия квартиры")
+st.caption("Задачи для 5 класса · план квартиры, площади, коридоры")
 
-tab_theory, tab_practice = st.tabs(["Правила", "Задачи"])
+tab_theory, tab_practice = st.tabs(["📖 Правила", "✏️ Задачи"])
 
 with tab_theory:
     st.subheader("Наши инструменты")
@@ -723,30 +738,38 @@ with tab_theory:
             st.write(desc)
 
 with tab_practice:
-    st.subheader("Личный кабинет")
+    st.subheader("Твои данные")
+    st.caption("Необязательно — но так удобнее, если заходишь не один.")
 
-    col_name, col_grade = st.columns(2)
+    # Имя шире, класс узко (достаточно пары символов)
+    col_name, col_grade = st.columns([4, 1], gap="small")
     with col_name:
-        name = st.text_input("Имя ученика", value=st.session_state["name"])
+        name = st.text_input(
+            "Как тебя зовут?",
+            value=st.session_state["name"],
+            placeholder="Например, Маша",
+            max_chars=40,
+        )
     with col_grade:
-        grade = st.text_input("Класс", value=st.session_state["grade"])
+        grade = st.text_input(
+            "Класс",
+            value=st.session_state["grade"],
+            placeholder="5А",
+            max_chars=8,
+        )
 
-    st.session_state["name"] = name
-    st.session_state["grade"] = grade
+    st.session_state["name"] = name or ""
+    st.session_state["grade"] = grade or ""
 
-    if name:
-        st.markdown(f"**Привет, {name}!**")
-    if grade:
-        st.markdown(f"Класс: {grade}")
+    if name and grade:
+        st.markdown(f"👋 Привет, **{name}**! Класс **{grade}** — удачи!")
+    elif name:
+        st.markdown(f"👋 Привет, **{name}**!")
+    elif grade:
+        st.markdown(f"Класс **{grade}**. По желанию напиши имя слева.")
 
-    _stats = st.session_state["stats"]
-    _rate_txt = ""
-    if _stats["attempts"] > 0:
-        _rate_txt = f" · верно {_stats['success'] / _stats['attempts'] * 100:.0f}%"
-    st.caption(
-        f"Статистика за сеанс: попыток — {_stats['attempts']}, "
-        f"верных — {_stats['success']}{_rate_txt}"
-    )
+    # Слот заполняется в конце вкладки — после нажатия «Проверить», чтобы числа обновлялись сразу
+    stats_slot = st.empty()
 
     st.markdown("---")
 
@@ -772,10 +795,19 @@ with tab_practice:
         else:
             problem = next(p for p in filtered if p.title == selected_title)
 
-            st.markdown(f"### {problem.title}")
-            st.caption(f"Уровень: {problem.lvl}")
+            _t = html.escape(problem.title)
+            _lv = html.escape(problem.lvl)
+            st.markdown(
+                f'<h3 style="margin:0 0 0.35rem 0;color:#0f172a;font-size:1.35rem;">{_t}</h3>'
+                f'<p style="margin:0 0 0.65rem 0;color:#334155;font-size:1rem;font-weight:500;">'
+                f"Уровень: <span style='color:#0369a1;'>{_lv}</span></p>",
+                unsafe_allow_html=True,
+            )
 
-            st.markdown("**Чертёж**")
+            st.markdown(
+                '<p style="margin:0 0 0.2rem 0;font-weight:600;color:#0f172a;">Чертёж</p>',
+                unsafe_allow_html=True,
+            )
             fig, ax = plt.subplots(figsize=(4.8, 3.6), dpi=130)
             problem.draw(ax)
             fig.patch.set_facecolor("white")
@@ -792,13 +824,24 @@ with tab_practice:
             buf.seek(0)
             st.image(buf, width=520)
 
-            st.markdown("#### Условие")
-            st.write(problem.text)
+            st.markdown(
+                '<p style="margin:1rem 0 0.4rem 0;font-weight:600;font-size:1.05rem;color:#0f172a;">Условие</p>',
+                unsafe_allow_html=True,
+            )
+            _cond = html.escape(problem.text).replace("\n", "<br/>")
+            st.markdown(
+                f'<div style="color:#1e293b;line-height:1.55;font-size:1.02rem;">{_cond}</div>',
+                unsafe_allow_html=True,
+            )
 
             can_check_numeric = problem.answer_value != 0.0
 
             if can_check_numeric:
-                st.markdown("#### Попробуй решить сам")
+                st.markdown(
+                    '<p style="margin:1rem 0 0.4rem 0;font-weight:600;font-size:1.05rem;color:#0f172a;">'
+                    "Попробуй решить сам</p>",
+                    unsafe_allow_html=True,
+                )
                 user_value = st.number_input(
                     problem.answer_label,
                     value=0.0,
@@ -806,7 +849,7 @@ with tab_practice:
                     format="%.1f",
                     key=f"answer_{problem.id}",
                 )
-                check = st.button("Проверить ответ", key=f"check_{problem.id}")
+                check = st.button("Проверить ответ", key=f"check_{problem.id}", type="primary")
                 if check:
                     st.session_state["stats"]["attempts"] += 1
                     if abs(user_value - problem.answer_value) < 1e-6:
@@ -820,7 +863,29 @@ with tab_practice:
 
             show_solution = st.toggle("Показать решение", value=False, key=f"sol_{problem.id}")
             if show_solution:
-                st.markdown("#### Пошаговое решение")
+                st.markdown(
+                    '<p style="margin:0.75rem 0 0.4rem 0;font-weight:600;font-size:1.05rem;color:#0f172a;">'
+                    "Пошаговое решение</p>",
+                    unsafe_allow_html=True,
+                )
                 for i, step in enumerate(problem.steps, start=1):
                     st.markdown(f"**{i}.** {step}")
                 st.markdown(f"**Ответ:** {problem.answer_text}")
+
+    _stats = st.session_state["stats"]
+    _att = _stats["attempts"]
+    _ok = _stats["success"]
+    _pct = (_ok / _att) if _att > 0 else 0.0
+    with stats_slot.container():
+        st.markdown("##### 📊 Статистика за сеанс")
+        _m1, _m2, _m3 = st.columns(3)
+        _m1.metric("Всего проверок", _att)
+        _m2.metric("Верных ответов", _ok)
+        _m3.metric("Доля верных", f"{_pct * 100:.0f}%" if _att else "—")
+        if _att > 0:
+            st.progress(
+                _pct,
+                text=f"{_ok} верных из {_att} попыток ({_pct * 100:.0f}%)",
+            )
+        else:
+            st.caption("Здесь появится полоска прогресса после первой проверки ответа.")
