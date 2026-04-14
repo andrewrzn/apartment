@@ -4,8 +4,8 @@ from __future__ import annotations
 from matplotlib.patches import Rectangle
 
 # Единица координат ≈ 1 м (поля зарезервированы под подписи)
-DEFAULT_XMAX = 18.0
-DEFAULT_YMAX = 13.0
+DEFAULT_XMAX = 20.0
+DEFAULT_YMAX = 16.0
 
 ROOM = "#f8fafc"
 ROOM_GREEN = "#dcfce7"

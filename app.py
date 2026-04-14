@@ -8,7 +8,6 @@ from drawing import (
     draw_rect,
     draw_dim_h,
     draw_dim_v,
-    ROOM,
     ROOM_GREEN,
     ROOM_BALC,
     CORRIDOR,
@@ -66,10 +65,10 @@ problems: List[Problem] = []
 
 def draw_B1(ax):
     setup_axes(ax)
-    draw_rect(ax, 1, 2, 4, 4, "К", fc=ROOM_GREEN, zorder=3)
-    draw_rect(ax, 5, 2, 6, 4, "Кор", fc=CORRIDOR, zorder=2)
-    draw_dim_v(ax, 2, 6, 0.6, "4 м")
-    draw_dim_h(ax, 5, 11, 1.4, "6 м")
+    draw_rect(ax, 1, 1, 4, 4, "К", fc=ROOM_GREEN, zorder=3)
+    draw_rect(ax, 5, 1, 6, 4, "Кор", fc=CORRIDOR, zorder=2)
+    draw_dim_v(ax, 1, 5, 0.6, "4 м")
+    draw_dim_h(ax, 5, 11, 0.4, "6 м")
 
 
 problems.append(
@@ -95,10 +94,10 @@ problems.append(
 
 def draw_B2(ax):
     setup_axes(ax)
-    draw_rect(ax, 2, 2, 5, 5, "К", zorder=3)
-    draw_rect(ax, 2, 7, 5, 2, "Балк", fc=ROOM_BALC, zorder=3)
-    draw_dim_h(ax, 2, 7, 1.4, "5 м")
-    draw_dim_v(ax, 7, 9, 7.1, "2 м")
+    draw_rect(ax, 2, 1, 5, 5, "К", zorder=3)
+    draw_rect(ax, 2, 6, 5, 2, "Балк", fc=ROOM_BALC, zorder=3)
+    draw_dim_h(ax, 2, 7, 0.4, "5 м")
+    draw_dim_v(ax, 6, 8, 7.1, "2 м")
 
 
 problems.append(
@@ -123,10 +122,10 @@ problems.append(
 
 def draw_B3(ax):
     setup_axes(ax)
-    draw_rect(ax, 4, 3, 3, 3, "К1", zorder=3)
-    draw_rect(ax, 2, 3, 2, 3, "Кор", fc=CORRIDOR, zorder=2)
-    draw_dim_h(ax, 2, 4, 2.35, "2 м")
-    draw_dim_v(ax, 3, 6, 7.1, "3 м")
+    draw_rect(ax, 4, 1, 3, 3, "К1", zorder=3)
+    draw_rect(ax, 2, 1, 2, 3, "Кор", fc=CORRIDOR, zorder=2)
+    draw_dim_h(ax, 2, 4, 0.35, "2 м")
+    draw_dim_v(ax, 1, 4, 7.1, "3 м")
 
 
 problems.append(
@@ -151,10 +150,10 @@ problems.append(
 
 def draw_B4(ax):
     setup_axes(ax)
-    draw_rect(ax, 1, 2, 6, 6, "К", zorder=3)
-    draw_rect(ax, 7, 2, 3, 6, "Кор", fc=CORRIDOR, zorder=2)
-    draw_dim_h(ax, 1, 7, 1.4, "6 м")
-    draw_dim_h(ax, 7, 10, 1.4, "3 м")
+    draw_rect(ax, 1, 1, 6, 6, "К", zorder=3)
+    draw_rect(ax, 7, 1, 3, 6, "Кор", fc=CORRIDOR, zorder=2)
+    draw_dim_h(ax, 1, 7, 0.4, "6 м")
+    draw_dim_h(ax, 7, 10, 0.4, "3 м")
 
 
 problems.append(
@@ -179,11 +178,11 @@ problems.append(
 
 def draw_B5(ax):
     setup_axes(ax)
-    draw_rect(ax, 1, 2, 4, 4, "К1", fc=ROOM_GREEN, zorder=3)
-    draw_rect(ax, 1, 6, 4, 4, "К2", fc=ROOM_GREEN, zorder=3)
-    draw_rect(ax, 5, 2, 2, 8, "Кор", fc=CORRIDOR, zorder=2)
-    draw_dim_v(ax, 2, 10, 0.55, "8 м")
-    draw_dim_h(ax, 5, 7, 1.4, "2 м")
+    draw_rect(ax, 1, 1, 4, 4, "К1", fc=ROOM_GREEN, zorder=3)
+    draw_rect(ax, 1, 5, 4, 4, "К2", fc=ROOM_GREEN, zorder=3)
+    draw_rect(ax, 5, 1, 2, 8, "Кор", fc=CORRIDOR, zorder=2)
+    draw_dim_v(ax, 2, 9, 0.55, "8 м")
+    draw_dim_h(ax, 5, 7, 0.4, "2 м")
 
 
 problems.append(
@@ -210,12 +209,13 @@ problems.append(
 
 def draw_C1(ax):
     setup_axes(ax)
+    # Слева: К1 4×4, К2 6×6 (квадрат); справа столбец 10 м: коридор 6×10, К3 4×10 (на плане прямоугольник)
     draw_rect(ax, 1, 1, 4, 4, "К1(4)", zorder=3)
-    draw_rect(ax, 1, 5, 4, 6, "К2(6)", zorder=3)
-    draw_rect(ax, 5, 1, 10, 6, "Кор", fc=CORRIDOR, zorder=2)
-    draw_rect(ax, 5, 7, 10, 4, "К3(10)", zorder=3)
+    draw_rect(ax, 1, 5, 6, 6, "К2(6)", zorder=3)
+    draw_rect(ax, 7, 1, 10, 6, "Кор", fc=CORRIDOR, zorder=2)
+    draw_rect(ax, 7, 7, 10, 4, "К3", zorder=3)
     draw_dim_v(ax, 1, 11, 0.55, "10 м")
-    draw_dim_h(ax, 5, 15, 0.45, "10 м")
+    draw_dim_h(ax, 7, 17, 0.45, "10 м")
 
 
 problems.append(
@@ -223,13 +223,13 @@ problems.append(
         id="C1",
         lvl="Средний",
         title="С1. Три комнаты",
-        text="Комната 1 — квадрат с периметром 16 м, снизу слева. Над ней комната 2 со стороной 6 м. "
-        "Справа квадратная комната 3, высота всей квартиры 10 м. Под комнатой 3 находится коридор. "
-        "Найдите площадь коридора.",
+        text="Комната 1 — квадрат с периметром 16 м, снизу слева. Над ней квадратная комната 2 со стороной 6 м "
+        "(левый столбец шириной 6 м, как на плане). Справа столбец шириной 10 м; высота всей квартиры 10 м. "
+        "Сверху комната 3 размером 10×4 м, под ней — коридор. Найдите площадь коридора.",
         steps=[
             "Сторона К1: 16 : 4 = 4 м.",
-            "Общая высота слева: 4 + 6 = 10 м ⇒ сторона К3 = 10 м.",
-            "Коридор под К3: высота 10 − 4 = 6 м, ширина 10 м.",
+            "Общая высота слева: 4 + 6 = 10 м.",
+            "Комната 3 на плане имеет высоту 4 м, значит под ней коридор высотой 10 − 4 = 6 м; ширина столбца 10 м.",
             "Площадь коридора: S = 6 · 10 = 60 м².",
         ],
         answer_text="60 м²",
@@ -245,7 +245,7 @@ def draw_C2(ax):
     draw_rect(ax, 5, 1, 7, 7, "К4(7)", zorder=1)
     draw_rect(ax, 5, 1, 2, 4, "Кор", fc=CORRIDOR, zorder=4)
     draw_rect(ax, 1, 1, 4, 4, "К1(4)", zorder=3)
-    draw_rect(ax, 1, 5, 4, 3, "К2(3)", zorder=3)
+    draw_rect(ax, 1, 5, 3, 3, "К2(3)", zorder=3)
     draw_rect(ax, 5, 5, 3, 3, "К3(3)", zorder=3)
     draw_dim_h(ax, 5, 7, 0.45, "2 м")
     draw_dim_v(ax, 1, 5, 7.1, "4 м")
@@ -498,7 +498,7 @@ problems.append(
 def draw_C10(ax):
     setup_axes(ax)
     draw_rect(ax, 1, 1, 5, 5, "К1(5)", zorder=3)
-    draw_rect(ax, 1, 6, 5, 4, "К2(4)", zorder=3)
+    draw_rect(ax, 1, 6, 4, 4, "К2(4)", zorder=3)
     draw_rect(ax, 6, 6, 6, 3, "К3", zorder=3)
     draw_rect(ax, 6, 1, 6, 6, "Кор", fc=CORRIDOR, zorder=2)
     draw_dim_v(ax, 1, 10, 0.55, "9 м")
@@ -530,11 +530,12 @@ problems.append(
 
 
 def draw_P1(ax):
-    setup_axes(ax)
-    draw_rect(ax, 1, 2, 3, 3, "a1", zorder=3)
-    draw_rect(ax, 1, 5, 3, 4, "a2", zorder=3)
-    draw_rect(ax, 4, 4, 5, 5, "a3", zorder=3)
-    draw_rect(ax, 4, 2, 5, 2, "Кор", fc=CORRIDOR_ROSE, zorder=4)
+    # Числовой пример a1=6 м: квадраты 6×6, 8×8 и 12×12; коридор 12×2
+    setup_axes(ax, xmax=22, ymax=16)
+    draw_rect(ax, 1, 1, 6, 6, "a1=6", zorder=3)
+    draw_rect(ax, 1, 7, 8, 8, "a2=8", zorder=3)
+    draw_rect(ax, 9, 3, 12, 12, "a3=12", zorder=3)
+    draw_rect(ax, 9, 1, 12, 2, "Кор", fc=CORRIDOR_ROSE, zorder=4)
 
 
 problems.append(
@@ -542,9 +543,9 @@ problems.append(
         id="P1",
         lvl="Продвинутый",
         title="П1. Выражение через P1",
-        text="Комната 1 — квадрат, её периметр P1. Над ней комната 2, периметр которой на 8 м больше. "
+        text="Комната 1 — квадрат, её периметр P1. Над ней квадратная комната 2, периметр которой на 8 м больше. "
         "Справа квадратная комната 3, её периметр на 16 м больше, чем у комнаты 2. "
-        "Под комнатой 3 — коридор. Выразите площадь коридора через P1.",
+        "Под комнатой 3 — коридор. Выразите площадь коридора через P1. (На чертеже — пример при a1 = 6 м.)",
         steps=[
             "Пусть сторона комнаты 1: a1 = P1 / 4.",
             "Тогда a2 = a1 + 2, a3 = a2 + 4 = a1 + 6.",
@@ -593,12 +594,13 @@ problems.append(
 
 
 def draw_P3(ax):
-    setup_axes(ax)
-    draw_rect(ax, 5, 2, 6, 4, "Кор", fc=CORRIDOR, zorder=2)
+    setup_axes(ax, xmax=20, ymax=14)
+    # К1 4×4, К2 6×6; справа коридор 6×4 и К3 6×6; К4 6×10
     draw_rect(ax, 1, 2, 4, 4, "К1(4)", zorder=3)
-    draw_rect(ax, 1, 6, 4, 6, "К2(6)", zorder=3)
-    draw_rect(ax, 5, 6, 6, 6, "К3(6)", zorder=3)
-    draw_rect(ax, 11, 2, 6, 10, "К4(10)", zorder=3)
+    draw_rect(ax, 1, 6, 6, 6, "К2(6)", zorder=3)
+    draw_rect(ax, 7, 2, 6, 4, "Кор", fc=CORRIDOR, zorder=2)
+    draw_rect(ax, 7, 6, 6, 6, "К3(6)", zorder=3)
+    draw_rect(ax, 13, 2, 6, 10, "К4(10)", zorder=3)
 
 
 problems.append(
@@ -625,11 +627,12 @@ problems.append(
 
 
 def draw_P4(ax):
-    setup_axes(ax)
-    draw_rect(ax, 1, 2, 3, 3, "a", zorder=3)
-    draw_rect(ax, 1, 5, 3, 4, "a+1", zorder=3)
-    draw_rect(ax, 4, 4, 5, 5, "a+3", zorder=3)
-    draw_rect(ax, 4, 2, 5, 2, "Кор", fc=CORRIDOR_ROSE, zorder=4)
+    # Пример a=4 м: квадраты 4×4, 5×5, 7×7; коридор 7×2
+    setup_axes(ax, xmax=15, ymax=12)
+    draw_rect(ax, 1, 1, 4, 4, "a=4", zorder=3)
+    draw_rect(ax, 1, 5, 5, 5, "a+1=5", zorder=3)
+    draw_rect(ax, 6, 3, 7, 7, "a+3=7", zorder=3)
+    draw_rect(ax, 6, 1, 7, 2, "Кор", fc=CORRIDOR_ROSE, zorder=4)
 
 
 problems.append(
@@ -639,7 +642,7 @@ problems.append(
         title="П4. Переменная a",
         text="Комната 1 — квадрат, её сторона a метров. Над ней квадратная комната 2 со стороной a+1 м. "
         "Справа от комнаты 2 — квадратная комната 3 со стороной a+3 м, под ней — коридор. "
-        "Общая высота квартиры равна 2a+1 м. Найдите площадь коридора через a.",
+        "Общая высота квартиры равна 2a+1 м. Найдите площадь коридора через a. (На чертеже — пример при a = 4 м.)",
         steps=[
             "Высота слева: a + (a+1) = 2a+1 — совпадает с общей высотой.",
             "Справа: комната 3 высотой a+3.",
@@ -736,6 +739,16 @@ with tab_practice:
             titles = [p.title for p in filtered]
             selected_title = st.selectbox("Задача", titles)
 
+        st.markdown("---")
+        st.caption("Статистика за сеанс")
+        _stats = st.session_state["stats"]
+        st.markdown(
+            f"Попыток: **{_stats['attempts']}** · Верных: **{_stats['success']}**"
+        )
+        if _stats["attempts"] > 0:
+            _rate = _stats["success"] / _stats["attempts"] * 100
+            st.caption(f"Доля верных: {_rate:.1f}%")
+
     with col_right:
         if not filtered or selected_title is None:
             st.info("Выберите задачу слева.")
@@ -744,15 +757,6 @@ with tab_practice:
 
             st.markdown(f"### {problem.title}")
             st.markdown(f"**Уровень:** {problem.lvl}")
-
-            stats = st.session_state["stats"]
-            st.markdown(
-                f"**Твоя статистика за этот сеанс:** "
-                f"попыток — {stats['attempts']}, верных — {stats['success']}."
-            )
-            if stats["attempts"] > 0:
-                rate = stats["success"] / stats["attempts"] * 100
-                st.markdown(f"_Процент верных ответов: {rate:.1f}%_")
 
             st.markdown("#### Чертёж")
             fig, ax = plt.subplots(figsize=(5.4, 4.2), dpi=120)
