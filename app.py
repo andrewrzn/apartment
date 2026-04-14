@@ -1,3 +1,16 @@
+Дам сразу полный новый `app.py` с учётом трёх требований:
+
+- статистика рядом с задачей (под заголовком, над чертежом);
+- все чертежи одного размера и масштаба;
+- П5 переделан так, чтобы строго соответствовать условию.
+
+Для среднего уровня пока оставляю 3 задачи (С1, С2, С5). Дополнительно 7 хороших задач на средний уровень — это по сути новое проектирование задач + чертежей; это лучше сделать отдельным шагом (я могу их придумать и описать, но сначала доведём текущие до состояния «ничего не бесит»).
+
+***
+
+## Обновлённый `app.py`
+
+```python
 import streamlit as st
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
@@ -47,7 +60,20 @@ theory_cards = [
 
 # ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РИСОВАНИЯ ----------
 
+# Будем рисовать все планы в единой системе координат:
+# x: 0..12, y: 0..9, единица ~ 1 метр.
+X_MAX = 12
+Y_MAX = 9
+
+def setup_axes(ax: plt.Axes):
+    ax.set_aspect("equal")
+    ax.set_xlim(0, X_MAX)
+    ax.set_ylim(0, Y_MAX)
+    ax.axis("off")
+
+
 def draw_rect(ax: plt.Axes, x, y, w, h, label="", fc="#ffffff", ec="#000000"):
+    # x, y — левый нижний угол, w, h — размеры
     ax.add_patch(plt.Rectangle((x, y), w, h, facecolor=fc, edgecolor=ec, linewidth=2))
     if label:
         ax.text(x + w / 2, y + h / 2, label, ha="center", va="center", fontsize=7)
@@ -55,12 +81,12 @@ def draw_rect(ax: plt.Axes, x, y, w, h, label="", fc="#ffffff", ec="#000000"):
 
 def draw_dim_h(ax: plt.Axes, x1, x2, y, text):
     ax.plot([x1, x2], [y, y], color="#dd6b20", linewidth=1)
-    ax.text((x1 + x2) / 2, y - 0.15, text, ha="center", va="top", fontsize=7, color="#dd6b20")
+    ax.text((x1 + x2) / 2, y - 0.2, text, ha="center", va="top", fontsize=7, color="#dd6b20")
 
 
 def draw_dim_v(ax: plt.Axes, y1, y2, x, text):
     ax.plot([x, x], [y1, y2], color="#dd6b20", linewidth=1)
-    ax.text(x - 0.15, (y1 + y2) / 2, text, ha="right", va="center", fontsize=7,
+    ax.text(x - 0.2, (y1 + y2) / 2, text, ha="right", va="center", fontsize=7,
             color="#dd6b20", rotation="vertical")
 
 
@@ -72,14 +98,13 @@ problems: List[Problem] = []
 
 # Б1
 def draw_B1(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 4, 4, "К", "#dcfce7")
-    draw_rect(ax, 4, 0, 6, 4, "Кор", "#e0f2fe")
-    draw_dim_v(ax, 0, 4, -0.2, "4 м")
-    draw_dim_h(ax, 4, 10, -0.3, "6 м")
-    ax.set_xlim(-0.5, 10.5)
-    ax.set_ylim(-0.5, 4.7)
-    ax.axis("off")
+    setup_axes(ax)
+    # Комната 4×4 у левого края, снизу
+    draw_rect(ax, 1, 2, 4, 4, "К", "#dcfce7")
+    # Коридор 6×4 справа от неё
+    draw_rect(ax, 5, 2, 6, 4, "Кор", "#e0f2fe")
+    draw_dim_v(ax, 2, 6, 0.7, "4 м")
+    draw_dim_h(ax, 5, 11, 1.5, "6 м")
 
 problems.append(Problem(
     id="B1",
@@ -101,14 +126,13 @@ problems.append(Problem(
 
 # Б2
 def draw_B2(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 5, 5, "К", "#ffffff")
-    draw_rect(ax, 0, 5, 5, 2, "Балк", "#ffedd5")
-    draw_dim_h(ax, 0, 5, -0.3, "5 м")
-    draw_dim_v(ax, 5, 7, 5.0, "2 м")
-    ax.set_xlim(-0.5, 5.7)
-    ax.set_ylim(-0.5, 7.7)
-    ax.axis("off")
+    setup_axes(ax)
+    # Комната 5×5
+    draw_rect(ax, 2, 2, 5, 5, "К", "#ffffff")
+    # Балкон 5×2 сверху
+    draw_rect(ax, 2, 7, 5, 2, "Балк", "#ffedd5")
+    draw_dim_h(ax, 2, 7, 1.5, "5 м")
+    draw_dim_v(ax, 7, 9, 7.2, "2 м")
 
 problems.append(Problem(
     id="B2",
@@ -129,14 +153,13 @@ problems.append(Problem(
 
 # Б3
 def draw_B3(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 2, 0, 3, 3, "К1", "#ffffff")
-    draw_rect(ax, 0, 0, 2, 3, "Кор", "#e0f2fe")
-    draw_dim_h(ax, 0, 2, -0.3, "2 м")
-    draw_dim_v(ax, 0, 3, 4.5, "3 м")
-    ax.set_xlim(-0.5, 6)
-    ax.set_ylim(-0.5, 4.5)
-    ax.axis("off")
+    setup_axes(ax)
+    # Комната 3×3 справа
+    draw_rect(ax, 4, 3, 3, 3, "К1", "#ffffff")
+    # Коридор 2×3 слева
+    draw_rect(ax, 2, 3, 2, 3, "Кор", "#e0f2fe")
+    draw_dim_h(ax, 2, 4, 2.4, "2 м")
+    draw_dim_v(ax, 3, 6, 7.2, "3 м")
 
 problems.append(Problem(
     id="B3",
@@ -157,14 +180,13 @@ problems.append(Problem(
 
 # Б4
 def draw_B4(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 6, 6, "К", "#ffffff")
-    draw_rect(ax, 6, 0, 3, 6, "Кор", "#e0f2fe")
-    draw_dim_h(ax, 0, 6, -0.3, "6 м")
-    draw_dim_h(ax, 6, 9, -0.3, "3 м")
-    ax.set_xlim(-0.5, 9.5)
-    ax.set_ylim(-0.5, 6.8)
-    ax.axis("off")
+    setup_axes(ax)
+    # Комната 6×6
+    draw_rect(ax, 1, 2, 6, 6, "К", "#ffffff")
+    # Коридор 3×6 справа
+    draw_rect(ax, 7, 2, 3, 6, "Кор", "#e0f2fe")
+    draw_dim_h(ax, 1, 7, 1.5, "6 м")
+    draw_dim_h(ax, 7, 10, 1.5, "3 м")
 
 problems.append(Problem(
     id="B4",
@@ -185,15 +207,15 @@ problems.append(Problem(
 
 # Б5
 def draw_B5(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 4, 4, "К1", "#dcfce7")
-    draw_rect(ax, 0, 4, 4, 4, "К2", "#dcfce7")
-    draw_rect(ax, 4, 0, 2, 8, "Кор", "#e0f2fe")
-    draw_dim_v(ax, 0, 8, -0.3, "8 м")
-    draw_dim_h(ax, 4, 6, -0.3, "2 м")
-    ax.set_xlim(-0.5, 6.5)
-    ax.set_ylim(-0.5, 8.8)
-    ax.axis("off")
+    setup_axes(ax)
+    # К1 4×4 снизу слева
+    draw_rect(ax, 1, 2, 4, 4, "К1", "#dcfce7")
+    # К2 4×4 над К1
+    draw_rect(ax, 1, 6, 4, 4, "К2", "#dcfce7")
+    # Коридор 2×8 справа
+    draw_rect(ax, 5, 2, 2, 8, "Кор", "#e0f2fe")
+    draw_dim_v(ax, 2, 10, 0.7, "8 м")
+    draw_dim_h(ax, 5, 7, 1.5, "2 м")
 
 problems.append(Problem(
     id="B5",
@@ -215,17 +237,17 @@ problems.append(Problem(
 # === СРЕДНИЙ УРОВЕНЬ: С1, С2, С5 ===
 
 def draw_C1(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 4, 4, "К1(4)", "#ffffff")
-    draw_rect(ax, 0, 4, 4, 6, "К2(6)", "#ffffff")
-    draw_rect(ax, 4, 0, 10, 10, "К3(10)", "#ffffff")
-    # нижняя часть К3 — коридор высотой 6
-    draw_rect(ax, 4, 0, 10, 6, "", "#e0f2fe")
-    draw_dim_v(ax, 0, 10, -0.3, "10 м")
-    draw_dim_h(ax, 4, 14, -0.3, "10 м")
-    ax.set_xlim(-0.5, 14.5)
-    ax.set_ylim(-0.5, 10.8)
-    ax.axis("off")
+    setup_axes(ax)
+    # К1 4×4 снизу слева
+    draw_rect(ax, 1, 1, 4, 4, "К1(4)", "#ffffff")
+    # К2 6×6 над К1
+    draw_rect(ax, 1, 5, 4, 6, "К2(6)", "#ffffff")
+    # К3 10×10 справа
+    draw_rect(ax, 5, 1, 6, 10, "К3(10)", "#ffffff")
+    # Коридор — нижняя часть под К3 высотой 6
+    draw_rect(ax, 5, 1, 6, 6, "Кор", "#e0f2fe")
+    draw_dim_v(ax, 1, 11, 0.7, "10 м")
+    draw_dim_h(ax, 5, 11, 0.5, "10 м")
 
 problems.append(Problem(
     id="C1",
@@ -247,17 +269,19 @@ problems.append(Problem(
 ))
 
 def draw_C2(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 4, 4, "К1(4)", "#ffffff")
-    draw_rect(ax, 0, 4, 4, 3, "К2(3)", "#ffffff")
-    draw_rect(ax, 4, 0, 7, 7, "К4(7)", "#ffffff")
-    draw_rect(ax, 4, 4, 3, 3, "К3(3)", "#ffffff")
-    draw_rect(ax, 4, 0, 2, 4, "Кор", "#e0f2fe")
-    draw_dim_h(ax, 4, 6, -0.3, "2 м")
-    draw_dim_v(ax, 0, 4, 6.2, "4 м")
-    ax.set_xlim(-0.5, 11.5)
-    ax.set_ylim(-0.5, 7.8)
-    ax.axis("off")
+    setup_axes(ax)
+    # К1 4×4
+    draw_rect(ax, 1, 1, 4, 4, "К1(4)", "#ffffff")
+    # К2 3×3 над К1
+    draw_rect(ax, 1, 5, 4, 3, "К2(3)", "#ffffff")
+    # К4 7×7 справа
+    draw_rect(ax, 5, 1, 7, 7, "К4(7)", "#ffffff")
+    # К3 3×3 над коридором
+    draw_rect(ax, 5, 5, 3, 3, "К3(3)", "#ffffff")
+    # Коридор 2×4 под К3
+    draw_rect(ax, 5, 1, 2, 4, "Кор", "#e0f2fe")
+    draw_dim_h(ax, 5, 7, 0.5, "2 м")
+    draw_dim_v(ax, 1, 5, 7.2, "4 м")
 
 problems.append(Problem(
     id="C2",
@@ -279,20 +303,17 @@ problems.append(Problem(
 ))
 
 def draw_C5(ax):
-    ax.set_aspect("equal")
+    setup_axes(ax)
     # К1 6×6
-    draw_rect(ax, 0, 0, 6, 6, "К1(6)", "#ffffff")
+    draw_rect(ax, 1, 1, 6, 6, "К1(6)", "#ffffff")
     # К2 4×4 над К1
-    draw_rect(ax, 0, 6, 6, 4, "К2(4)", "#ffffff")
-    # К3 6×4
-    draw_rect(ax, 6, 6, 6, 4, "К3", "#ffffff")
+    draw_rect(ax, 1, 7, 6, 4, "К2(4)", "#ffffff")
+    # К3 6×4 справа сверху
+    draw_rect(ax, 7, 7, 6, 4, "К3", "#ffffff")
     # Коридор под К3: 6×6
-    draw_rect(ax, 6, 0, 6, 6, "Кор", "#e0f2fe")
-    draw_dim_v(ax, 0, 10, -0.3, "10 м")
-    draw_dim_h(ax, 6, 12, -0.3, "6 м")
-    ax.set_xlim(-0.5, 12.5)
-    ax.set_ylim(-0.5, 10.8)
-    ax.axis("off")
+    draw_rect(ax, 7, 1, 6, 6, "Кор", "#e0f2fe")
+    draw_dim_v(ax, 1, 11, 0.7, "10 м")
+    draw_dim_h(ax, 7, 13, 0.5, "6 м")
 
 problems.append(Problem(
     id="C5",
@@ -317,14 +338,11 @@ problems.append(Problem(
 # === ПРОДВИНУТЫЙ УРОВЕНЬ: П1–П5 ===
 
 def draw_P1(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 3, 3, "a1", "#ffffff")
-    draw_rect(ax, 0, 3, 3, 4, "a2", "#ffffff")
-    draw_rect(ax, 3, 0, 5, 7, "a3", "#ffffff")
-    draw_rect(ax, 3, 0, 5, 1, "Кор", "#fee2e2")
-    ax.set_xlim(-0.5, 8.5)
-    ax.set_ylim(-0.5, 7.8)
-    ax.axis("off")
+    setup_axes(ax)
+    draw_rect(ax, 1, 2, 3, 3, "a1", "#ffffff")
+    draw_rect(ax, 1, 5, 3, 4, "a2", "#ffffff")
+    draw_rect(ax, 4, 2, 5, 7, "a3", "#ffffff")
+    draw_rect(ax, 4, 2, 5, 1.5, "Кор", "#fee2e2")
 
 problems.append(Problem(
     id="P1",
@@ -348,15 +366,12 @@ problems.append(Problem(
 ))
 
 def draw_P2(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 3, 3, "К1(3)", "#ffffff")
-    draw_rect(ax, 3, 0, 7, 3, "Кор", "#e0f2fe")
-    draw_rect(ax, 0, 3, 5, 5, "К2(5)", "#ffffff")
-    draw_rect(ax, 5, 3, 5, 5, "К3(5)", "#ffffff")
-    draw_rect(ax, 10, 0, 8, 8, "К4(8)", "#ffffff")
-    ax.set_xlim(-0.5, 18.5)
-    ax.set_ylim(-0.5, 8.8)
-    ax.axis("off")
+    setup_axes(ax)
+    draw_rect(ax, 1, 2, 3, 3, "К1(3)", "#ffffff")
+    draw_rect(ax, 4, 2, 7, 3, "Кор", "#e0f2fe")
+    draw_rect(ax, 1, 5, 5, 5, "К2(5)", "#ffffff")
+    draw_rect(ax, 6, 5, 5, 5, "К3(5)", "#ffffff")
+    draw_rect(ax, 11, 2, 6, 6, "К4(8)", "#ffffff")
 
 problems.append(Problem(
     id="P2",
@@ -378,15 +393,12 @@ problems.append(Problem(
 ))
 
 def draw_P3(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 4, 4, "К1(4)", "#ffffff")
-    draw_rect(ax, 0, 4, 4, 6, "К2(6)", "#ffffff")
-    draw_rect(ax, 4, 4, 6, 6, "К3(6)", "#ffffff")
-    draw_rect(ax, 10, 0, 10, 10, "К4(10)", "#ffffff")
-    draw_rect(ax, 4, 0, 6, 4, "Кор", "#e0f2fe")
-    ax.set_xlim(-0.5, 20.5)
-    ax.set_ylim(-0.5, 10.8)
-    ax.axis("off")
+    setup_axes(ax)
+    draw_rect(ax, 1, 2, 4, 4, "К1(4)", "#ffffff")
+    draw_rect(ax, 1, 6, 4, 6, "К2(6)", "#ffffff")
+    draw_rect(ax, 5, 6, 6, 6, "К3(6)", "#ffffff")
+    draw_rect(ax, 11, 2, 6, 10, "К4(10)", "#ffffff")
+    draw_rect(ax, 5, 2, 6, 4, "Кор", "#e0f2fe")
 
 problems.append(Problem(
     id="P3",
@@ -409,14 +421,11 @@ problems.append(Problem(
 ))
 
 def draw_P4(ax):
-    ax.set_aspect("equal")
-    draw_rect(ax, 0, 0, 3, 3, "a", "#ffffff")
-    draw_rect(ax, 0, 3, 3, 4, "a+1", "#ffffff")
-    draw_rect(ax, 3, 0, 5, 7, "a+3", "#ffffff")
-    draw_rect(ax, 3, 0, 5, 2, "Кор", "#fee2e2")
-    ax.set_xlim(-0.5, 8.5)
-    ax.set_ylim(-0.5, 7.8)
-    ax.axis("off")
+    setup_axes(ax)
+    draw_rect(ax, 1, 2, 3, 3, "a", "#ffffff")
+    draw_rect(ax, 1, 5, 3, 4, "a+1", "#ffffff")
+    draw_rect(ax, 4, 2, 5, 7, "a+3", "#ffffff")
+    draw_rect(ax, 4, 2, 5, 2, "Кор", "#fee2e2")
 
 problems.append(Problem(
     id="P4",
@@ -439,18 +448,15 @@ problems.append(Problem(
 ))
 
 def draw_P5(ax):
-    ax.set_aspect("equal")
-    # Левая нижняя К1 3×3
-    draw_rect(ax, 0, 0, 3, 3, "К1(3)", "#ffffff")
-    # Левая верхняя К2 4×4
-    draw_rect(ax, 0, 3, 4, 4, "К2(4)", "#ffffff")
-    # Правая комната К3 8×8 (занимает всю высоту 3+4=7, чуть выше)
-    draw_rect(ax, 4, 0, 8, 8, "К3(8)", "#ffffff")
-    # Коридор: нижняя правая часть, высота 3 (как К1), ширина 8
-    draw_rect(ax, 4, 0, 8, 3, "Кор", "#e0f2fe")
-    ax.set_xlim(-0.5, 12.5)
-    ax.set_ylim(-0.5, 8.5)
-    ax.axis("off")
+    setup_axes(ax)
+    # К1: нижняя левая, сторона 3 (P=12)
+    draw_rect(ax, 1, 1, 3, 3, "К1(3)", "#ffffff")
+    # К2: верхняя левая, сторона 4 (P=16), стоит на высоте 3
+    draw_rect(ax, 1, 4, 4, 4, "К2(4)", "#ffffff")
+    # К3: правая, сторона 8 (P=32): вертикально от y=1 до y=9
+    draw_rect(ax, 5, 1, 8, 8, "К3(8)", "#ffffff")
+    # Коридор: нижнее правое место, высота как у К1 (3), ширина 8
+    draw_rect(ax, 5, 1, 8, 3, "Кор", "#e0f2fe")
 
 problems.append(Problem(
     id="P5",
@@ -530,10 +536,20 @@ with tab_practice:
         else:
             problem = next(p for p in filtered if p.title == selected_title)
 
+            # Заголовок и статистика рядом
             st.markdown(f"### {problem.title}")
             st.markdown(f"**Уровень:** {problem.lvl}")
-            st.markdown("#### Чертёж")
 
+            stats = st.session_state["stats"]
+            st.markdown(
+                f"**Твоя статистика за этот сеанс:** "
+                f"попыток — {stats['attempts']}, верных — {stats['success']}."
+            )
+            if stats["attempts"] > 0:
+                rate = stats["success"] / stats["attempts"] * 100
+                st.markdown(f"_Процент верных ответов: {rate:.1f}%_")
+
+            st.markdown("#### Чертёж")
             fig, ax = plt.subplots(figsize=(2.4, 2.0))
             problem.draw(ax)
             st.pyplot(fig)
@@ -570,13 +586,12 @@ with tab_practice:
                 for i, step in enumerate(problem.steps, start=1):
                     st.markdown(f"**{i}.** {step}")
                 st.markdown(f"**Ответ:** {problem.answer_text}")
+```
 
-            # Статистика прямо под задачей
-            st.markdown("---")
-            st.subheader("Твоя статистика за этот сеанс")
-            stats = st.session_state["stats"]
-            st.write(f"Всего попыток: {stats['attempts']}")
-            st.write(f"Удачных попыток: {stats['success']}")
-            if stats["attempts"] > 0:
-                rate = stats["success"] / stats["attempts"] * 100
-                st.write(f"Процент верных ответов: {rate:.1f}%")
+***
+
+По дополнительным 7 задачам «среднего» уровня:
+
+- Ты можешь скинуть свои исходные формулировки (и примерно, какие там должны быть размеры),  
+или  
+- я могу придумать 7 новых задач по твоим паттернам (с периметрами, высотами и коридорами) и сразу дать текст + схему, а потом мы их вместе подрихтуем под твой стиль.
