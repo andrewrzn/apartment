@@ -260,9 +260,6 @@ PAGES = {
     "Уровень 3": [t for t in TASKS if t.level == "Уровень 3"],
 }
 
-# Увеличивай при любых правках условий/ответов/справки в TASKS — по подписи на сайте видно, подтянулся ли деплой.
-PROPORSII_BUILD_ID = "tasks-r6-2025-04-17"
-
 
 def _parse_numbers(raw: str) -> list[float]:
     clean = raw.strip().replace(";", ",")
@@ -345,7 +342,6 @@ def render_proporsii_trenajer() -> None:
 
     st.title("📦🍫✨ Тренажер пропорций и площадей")
     st.caption("5 класс · учимся понимать отношения, площади и логику разрезаний")
-    st.caption(f"Версия заданий и справки: `{PROPORSII_BUILD_ID}` — если на сайте другая строка, деплой ещё не обновился или открыт не тот проект.")
 
     tab_home, tab_trainer, tab_check = st.tabs(["🏠 Главная", "✏️ Тренажер", "✅ Проверка"])
 
