@@ -122,7 +122,8 @@ theory_cards = [
     ("🧩", "План квартиры", "Общая высота/ширина квартиры — это сумма высот/ширин всех комнат и коридора."),
 ]
 
-ARCHIVE_DIR = Path("archive_pdfs")
+APP_DIR = Path(__file__).resolve().parent
+ARCHIVE_DIR = APP_DIR / "archive_pdfs"
 
 
 def _format_size(num_bytes: int) -> str:
