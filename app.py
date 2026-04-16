@@ -134,51 +134,39 @@ def _format_size(num_bytes: int) -> str:
     return f"{kb:.0f} KB"
 
 
-def _collect_theme_pdfs(base_dir: Path) -> dict[str, dict[str, list[Path]]]:
+def _collect_theme_pdfs(base_dir: Path) -> dict[str, list[Path]]:
     """
-    Ищет PDF в archive_pdfs и группирует по темам и подтемам.
+    Ищет PDF в archive_pdfs и группирует только по темам.
     Пример:
     archive_pdfs/5класс/геометрия/...
     archive_pdfs/5класс/дроби/...
     """
-    grouped: dict[str, dict[str, list[Path]]] = {}
+    grouped: dict[str, list[Path]] = {}
     if not base_dir.exists():
         return grouped
 
-    # Сначала добавляем темы/подтемы по структуре папок, даже если PDF еще нет.
+    # Сначала добавляем темы по структуре папок, даже если PDF еще нет.
     for theme_dir in base_dir.iterdir():
         if not theme_dir.is_dir():
             continue
-        theme = theme_dir.name
-        grouped.setdefault(theme, {})
-        has_subthemes = False
-        for subtheme_dir in theme_dir.iterdir():
-            if subtheme_dir.is_dir():
-                has_subthemes = True
-                grouped[theme].setdefault(subtheme_dir.name, [])
-        if not has_subthemes:
-            grouped[theme].setdefault("Общее", [])
+        grouped.setdefault(theme_dir.name, [])
 
     for pdf_path in base_dir.rglob("*.pdf"):
         rel = pdf_path.relative_to(base_dir)
         if len(rel.parts) == 1:
             theme = "Общее"
-            subtheme = "Общее"
         else:
             theme = rel.parts[0]
-            subtheme = "/".join(rel.parts[1:-1]) if len(rel.parts) > 2 else "Общее"
-        grouped.setdefault(theme, {}).setdefault(subtheme, []).append(pdf_path)
+        grouped.setdefault(theme, []).append(pdf_path)
 
     for theme in grouped:
-        for subtheme in grouped[theme]:
-            grouped[theme][subtheme] = sorted(grouped[theme][subtheme], key=lambda p: p.name.lower())
-        grouped[theme] = dict(sorted(grouped[theme].items(), key=lambda item: item[0].lower()))
+        grouped[theme] = sorted(grouped[theme], key=lambda p: p.name.lower())
     return dict(sorted(grouped.items(), key=lambda item: item[0].lower()))
 
 
 def _render_library() -> None:
     st.subheader("📚 Библиотека материалов")
-    st.caption("Здесь хранятся полезные PDF-материалы по темам и подтемам.")
+    st.caption("Здесь хранятся полезные PDF-материалы по темам.")
 
     theme_pdfs = _collect_theme_pdfs(ARCHIVE_DIR)
     if not theme_pdfs:
@@ -193,33 +181,24 @@ def _render_library() -> None:
         )
         return
 
-    c_theme, c_subtheme = st.columns(2)
-    with c_theme:
-        theme_names = list(theme_pdfs.keys())
-        theme_counts = {theme: sum(len(files) for files in subthemes.values()) for theme, subthemes in theme_pdfs.items()}
+    theme_names = list(theme_pdfs.keys())
+    theme_counts = {theme: len(files) for theme, files in theme_pdfs.items()}
+    theme_col, _spacer = st.columns([1, 3], gap="small")
+    with theme_col:
         current_theme = st.selectbox(
             "Тема",
             theme_names,
             index=0,
             format_func=lambda t: f"{t} ({theme_counts[t]})",
         )
-    with c_subtheme:
-        subtheme_names = list(theme_pdfs[current_theme].keys())
-        subtheme_counts = {sub: len(files) for sub, files in theme_pdfs[current_theme].items()}
-        current_subtheme = st.selectbox(
-            "Подтема",
-            subtheme_names,
-            index=0,
-            format_func=lambda s: f"{s} ({subtheme_counts[s]})",
-        )
-    st.caption(f"Файлов в выбранной подтеме: {len(theme_pdfs[current_theme][current_subtheme])}")
+    st.caption(f"Файлов в выбранной теме: {len(theme_pdfs[current_theme])}")
 
-    files_in_subtheme = theme_pdfs[current_theme][current_subtheme]
-    if not files_in_subtheme:
-        st.info("В этой подтеме пока нет PDF-файлов.")
+    files_in_theme = theme_pdfs[current_theme]
+    if not files_in_theme:
+        st.info("В этой теме пока нет PDF-файлов.")
         return
 
-    for pdf_path in files_in_subtheme:
+    for pdf_path in files_in_theme:
         file_size = _format_size(pdf_path.stat().st_size)
         rel_path = pdf_path.relative_to(ARCHIVE_DIR).as_posix()
         c_name, c_size, c_dl = st.columns([5, 2, 2], vertical_alignment="center")
