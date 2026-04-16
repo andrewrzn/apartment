@@ -85,12 +85,11 @@ def _d6(ax: plt.Axes) -> None:
     )
     ax.text(1, h / 2, "30", ha="center", va="center", fontsize=11, weight="bold")
     ax.text(5, h / 2, "90", ha="center", va="center", fontsize=11, weight="bold")
-    ax.text(1, -0.9, "2 см", ha="center", va="top", fontsize=10, color="#334155")
-    ax.text(5, -0.9, "6 см", ha="center", va="top", fontsize=10, color="#334155")
-    ax.text(4, h + 0.6, "15 см", ha="center", va="bottom", fontsize=10, color="#334155")
+    # Длинная сторона 15 см — подпись вдоль левого ребра (без 2 см / 6 см снизу).
+    ax.text(-0.55, h / 2, "15 см", ha="center", va="center", rotation=90, fontsize=10, color="#334155")
     ax.set_aspect("equal")
-    ax.set_xlim(-0.35, 8.35)
-    ax.set_ylim(-1.55, h + 1.15)
+    ax.set_xlim(-1.15, 8.35)
+    ax.set_ylim(-0.2, h + 0.35)
     ax.axis("off")
 
 
@@ -120,14 +119,14 @@ def _d7(ax: plt.Axes) -> None:
     )
     ax.text(2, h_short / 2, "40", ha="center", va="center", fontsize=11, weight="bold")
     ax.text(12, h_short / 2, "160", ha="center", va="center", fontsize=11, weight="bold")
-    ax.text(2, -0.65, "4 см", ha="center", va="top", fontsize=10, color="#334155")
-    ax.text(12, -0.65, "16 см", ha="center", va="top", fontsize=10, color="#334155")
     ax.text(w_long / 2, h_short + 0.55, "20 см (длинная)", ha="center", va="bottom", fontsize=9, color="#334155")
     ax.text(-0.55, h_short / 2, "10 см", ha="right", va="center", fontsize=10, color="#334155")
     ax.set_aspect("equal")
     ax.set_xlim(-1.0, w_long + 0.5)
-    ax.set_ylim(-1.25, h_short + 1.05)
+    ax.set_ylim(-0.2, h_short + 1.05)
     ax.axis("off")
+
+
 def _d8(ax: plt.Axes) -> None: _draw_split(ax, [2, 3], ["2 части", "3 части"])
 def _d9(ax: plt.Axes) -> None:
     # Квадрат 12×12 см: сторона делится 1:3 → 3 см и 9 см.
@@ -154,12 +153,10 @@ def _d9(ax: plt.Axes) -> None:
     )
     ax.text(1.5, s / 2, "36", ha="center", va="center", fontsize=11, weight="bold")
     ax.text(7.5, s / 2, "108", ha="center", va="center", fontsize=11, weight="bold")
-    ax.text(1.5, -0.75, "3 см", ha="center", va="top", fontsize=10, color="#334155")
-    ax.text(7.5, -0.75, "9 см", ha="center", va="top", fontsize=10, color="#334155")
     ax.text(-0.7, s / 2, "12 см", ha="right", va="center", fontsize=10, color="#334155")
     ax.set_aspect("equal")
     ax.set_xlim(-1.15, 12.35)
-    ax.set_ylim(-1.35, s + 0.85)
+    ax.set_ylim(-0.2, s + 0.85)
     ax.axis("off")
 
 
