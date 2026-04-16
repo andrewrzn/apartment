@@ -145,6 +145,20 @@ def _collect_theme_pdfs(base_dir: Path) -> dict[str, dict[str, list[Path]]]:
     if not base_dir.exists():
         return grouped
 
+    # Сначала добавляем темы/подтемы по структуре папок, даже если PDF еще нет.
+    for theme_dir in base_dir.iterdir():
+        if not theme_dir.is_dir():
+            continue
+        theme = theme_dir.name
+        grouped.setdefault(theme, {})
+        has_subthemes = False
+        for subtheme_dir in theme_dir.iterdir():
+            if subtheme_dir.is_dir():
+                has_subthemes = True
+                grouped[theme].setdefault(subtheme_dir.name, [])
+        if not has_subthemes:
+            grouped[theme].setdefault("Общее", [])
+
     for pdf_path in base_dir.rglob("*.pdf"):
         rel = pdf_path.relative_to(base_dir)
         if len(rel.parts) == 1:
@@ -200,7 +214,12 @@ def _render_library() -> None:
         )
     st.caption(f"Файлов в выбранной подтеме: {len(theme_pdfs[current_theme][current_subtheme])}")
 
-    for pdf_path in theme_pdfs[current_theme][current_subtheme]:
+    files_in_subtheme = theme_pdfs[current_theme][current_subtheme]
+    if not files_in_subtheme:
+        st.info("В этой подтеме пока нет PDF-файлов.")
+        return
+
+    for pdf_path in files_in_subtheme:
         file_size = _format_size(pdf_path.stat().st_size)
         rel_path = pdf_path.relative_to(ARCHIVE_DIR).as_posix()
         c_name, c_size, c_dl = st.columns([5, 2, 2], vertical_alignment="center")
